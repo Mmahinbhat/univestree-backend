@@ -7,6 +7,8 @@ const universityRoutes = require('./routes/universities');
 const emailRoutes = require('./routes/emails');
 const waitlistRoutes = require('./routes/waitlist');
 const trackerRoutes = require('./routes/tracker');
+const coursesRoutes = require('./routes/courses');
+const scholarshipsRoutes = require('./routes/scholarships');
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.use('/api/universities', universityRoutes);
 app.use('/api/emails', emailRoutes);
 app.use('/api/waitlist', waitlistRoutes);
 app.use('/api/tracker', trackerRoutes);
+app.use('/api/courses', coursesRoutes);
+app.use('/api/scholarships', scholarshipsRoutes);
 
 // Test route
 app.get('/', (req, res) => {
