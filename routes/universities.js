@@ -4,7 +4,7 @@ const { db } = require('../firebase/admin');
 
 // SEARCH UNIVERSITIES
 router.get('/search', async (req, res) => {
-  const { query, country, program } = req.query;
+  const { query, country, program, level } = req.query;
 
   try {
     let ref = db.collection('universities');
