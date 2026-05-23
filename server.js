@@ -5,6 +5,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const universityRoutes = require('./routes/universities');
 const emailRoutes = require('./routes/emails');
+const waitlistRoutes = require('./routes/waitlist');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/universities', universityRoutes);
 app.use('/api/emails', emailRoutes);
+app.use('/api/waitlist', waitlistRoutes);
 
 // Test route
 app.get('/', (req, res) => {
