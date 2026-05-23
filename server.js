@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const universityRoutes = require('./routes/universities');
+const emailRoutes = require('./routes/emails');
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/universities', universityRoutes);
+app.use('/api/emails', emailRoutes);
 
 // Test route
 app.get('/', (req, res) => {
