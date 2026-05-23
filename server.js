@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const universityRoutes = require('./routes/universities');
 const emailRoutes = require('./routes/emails');
 const waitlistRoutes = require('./routes/waitlist');
+const trackerRoutes = require('./routes/tracker');
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/universities', universityRoutes);
 app.use('/api/emails', emailRoutes);
 app.use('/api/waitlist', waitlistRoutes);
+app.use('/api/tracker', trackerRoutes);
 
 // Test route
 app.get('/', (req, res) => {
