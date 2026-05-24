@@ -2,32 +2,36 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../firebase/admin');
 
+// Cache to avoid fetching all docs on every request
+let cache = null;
+let cacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function getAllUniversities() {
+  if (cache && Date.now() - cacheTime < CACHE_TTL) return cache;
+  const snapshot = await db.collection('universities').get();
+  cache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  cacheTime = Date.now();
+  return cache;
+}
+
 // SEARCH UNIVERSITIES
 router.get('/search', async (req, res) => {
   const { query, country, program, level, limit: limitParam, offset } = req.query;
-  const limitNum = Math.min(parseInt(limitParam) || 50, 100);
+  const limitNum = Math.min(parseInt(limitParam) || 48, 100);
+  const start = parseInt(offset) || 0;
 
   try {
-    let ref = db.collection('universities');
+    let universities = await getAllUniversities();
 
-    // Use Firestore query for country (exact match — efficient)
+    // Filter by country
     if (country) {
-      ref = ref.where('country', '==', country);
+      universities = universities.filter(u =>
+        u.country?.toLowerCase() === country.toLowerCase()
+      );
     }
 
-    // Fetch with limit — Firestore can't do full-text search natively
-    // so we fetch a batch and filter by name/program in JS
-    // For country-only queries this is very fast
-    // For text queries we fetch more and filter
-    const fetchLimit = query ? 500 : limitNum;
-    const snapshot = await ref.limit(fetchLimit).get();
-
-    let universities = [];
-    snapshot.forEach(doc => {
-      universities.push({ id: doc.id, ...doc.data() });
-    });
-
-    // Filter by search query (name or city)
+    // Filter by search query
     if (query) {
       const q = query.toLowerCase();
       universities = universities.filter(u =>
@@ -52,16 +56,19 @@ router.get('/search', async (req, res) => {
       );
     }
 
-    // Sort by ranking
-    universities.sort((a, b) => (a.ranking || 9999) - (b.ranking || 9999));
+    // Sort by ranking (unranked go to end)
+    universities.sort((a, b) => {
+      const ra = parseInt(a.ranking) || 99999;
+      const rb = parseInt(b.ranking) || 99999;
+      return ra - rb;
+    });
 
-    // Paginate
-    const start = parseInt(offset) || 0;
+    const total = universities.length;
     const paginated = universities.slice(start, start + limitNum);
 
     res.status(200).json({
       universities: paginated,
-      total: universities.length,
+      total,
       limit: limitNum,
       offset: start
     });
